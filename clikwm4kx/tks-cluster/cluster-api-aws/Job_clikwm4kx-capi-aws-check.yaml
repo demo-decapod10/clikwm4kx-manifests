@@ -1,0 +1,32 @@
+# Source: cluster-api-aws/templates/job-check.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: clikwm4kx-capi-aws-check
+  namespace: clikwm4kx
+spec:
+  template:
+    metadata:
+      name: clikwm4kx-capi-aws
+    spec:
+      serviceAccountName: clikwm4kx-capi-aws
+      containers:
+      - name: wait-for-ready
+        image: "ghcr.io/openinfradev/python_kubectl_argo:v1.1.0"
+        imagePullPolicy: IfNotPresent
+        command:
+        - timeout 
+        - 5m
+        - /wait_for_kubeconfig.sh  
+        - clikwm4kx
+        - clikwm4kx
+        volumeMounts:
+        - name: vol
+          subPath: wait_for_kubeconfig.sh
+          mountPath: /wait_for_kubeconfig.sh
+      volumes:
+      - name: vol
+        configMap:
+          name: clikwm4kx-capi-aws
+          defaultMode: 0555
+      restartPolicy: OnFailure
